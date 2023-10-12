@@ -36,10 +36,11 @@ function App() {
 
   useEffect(() => {
     setIsLoading(true);
-    setInterval(() => {
+    setTimeout(() => {
       setCities(data);
+      setIsLoading(false);
     }, 1000);
-    setIsLoading(false);
+
     /*    async function fetchCities() {
      try {
      setIsLoading(true);
