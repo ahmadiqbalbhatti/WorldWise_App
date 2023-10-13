@@ -66,18 +66,29 @@ function CitiesProvider({children}) {
    }*/
 
   function getCity(id) {
-    for (const index in data) {
-      console.log(data[index].id === id);
-      if (data[index].id === id) {
-        setCurrentCity(data[index]);
+    for (const index in cities) {
+      // console.log(data[index].id === id);
+      if (cities[index].id === id) {
+        setCurrentCity(cities[index]);
       }
     }
+  }
+
+
+  function createCity(newCity) {
+    setCities(prevCities => [...prevCities, newCity]);
+    console.log(cities);
+  }
+
+
+  function deleteCity(cityId) {
+    setCities(prevCities => prevCities.filter(city => city.id !== cityId));
   }
 
   return (
     <CitiesContext.Provider
       value={{
-        cities, isLoading, currentCity, getCity
+        cities, isLoading, currentCity, getCity, createCity, deleteCity
       }}>
       {children}
     </CitiesContext.Provider>
