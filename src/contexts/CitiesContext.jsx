@@ -2,28 +2,77 @@ import {
   createContext,
   useContext,
   useEffect,
-  useState
+  useReducer
 } from "react";
 import CITIES from "../../data/cities.json";
 
 const data = CITIES.cities;
 
+const initialState = {
+  cities     : [],
+  isLoading  : false,
+  currentCity: {}
+};
+
+function reducer(state, action) {
+  switch (action.type) {
+    case "loading":
+      return {
+        ...state, isLoading: true
+      };
+
+    case "city/loaded":
+      return {
+        ...state, isLoading: false, currentCity: action.payload
+      };
+    case "cities/loaded":
+      return {
+        ...state, isLoading: false, cities: action.payload
+      };
+    case "city/created":
+      return {
+        ...state,
+        isLoading  : false,
+        cities     : [...state.cities, action.payload],
+        currentCity: action.payload
+      };
+    case "city/deleted":
+      return {
+        ...state,
+        isLoading  : false,
+        cities     : state.cities.filter(city => city.id !== action.payload),
+        currentCity: {}
+      };
+    default:
+      throw new Error("Unknown Action type");
+
+  }
+}
+
+
 const CitiesContext = createContext();
 
 // eslint-disable-next-line react/prop-types
 function CitiesProvider({children}) {
+  const [
+          {
+            cities,
+            isLoading,
+            currentCity
+          }, dispatch
+        ] = useReducer(reducer, initialState);
 
-  const [cities, setCities]           = useState([]);
-  const [isLoading, setIsLoading]     = useState(false);
-  const [currentCity, setCurrentCity] = useState({});
+
+  // const [cities, setCities]           = useState([]);
+  // const [isLoading, setIsLoading]     = useState(false);
+  // const [currentCity, setCurrentCity] = useState({});
 
 
   useEffect(() => {
-    setIsLoading(true);
+    dispatch({type: "loading"});
     // console.log(isLoading);
     setTimeout(() => {
-      setCities(data);
-      setIsLoading(false);
+      dispatch({type: "cities/loaded", payload: data});
     }, 1000);
 
     /*    async function fetchCities() {
@@ -68,21 +117,24 @@ function CitiesProvider({children}) {
   function getCity(id) {
     for (const index in cities) {
       // console.log(data[index].id === id);
-      if (cities[index].id === id) {
-        setCurrentCity(cities[index]);
+      if (cities[index].id === Number(id)) {
+        // setCurrentCity(cities[index]);
+        dispatch({type: "city/loaded", payload: cities[index]});
       }
     }
   }
 
 
   function createCity(newCity) {
-    setCities(prevCities => [...prevCities, newCity]);
+    dispatch({type: "loading"});
+
+    dispatch({type: "city/created", payload: newCity});
     console.log(cities);
   }
 
 
   function deleteCity(cityId) {
-    setCities(prevCities => prevCities.filter(city => city.id !== cityId));
+    dispatch({type: "city/deleted", payload: cityId});
   }
 
   return (
